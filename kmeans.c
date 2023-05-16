@@ -26,6 +26,8 @@ void printPointList(PointList);
 void clearPointList(PointList*);
 int updateCentroid(Cluster*);
 void printPoint(Point);
+Cluster matchCluster(Point point, Cluster clusters[], int k);
+PointList readInput(void);
 
 double distance(Point p1, Point p2) {
     double sum = 0.0;
@@ -80,7 +82,27 @@ void printPoint(Point point) {
     printf("\n");
 }
 
-int main(void) {
+Cluster matchCluster(Point point, Cluster clusters[], int k) {
+    double minDistance = distance(point, clusters[0].centroid);
+    Cluster nearestCluster = clusters[0];
+    for (int i = 1; i < k; i++) {
+        double currDistance = distance(point, clusters[i].centroid);
+        if (currDistance < minDistance){
+            minDistance = currDistance;
+            nearestCluster = clusters[i];
+        }
+    }
+    return nearestCluster;
+}
+
+PointList readInput(void) {
+    PointList list = {NULL, 0};
+    Point p = {NULL, 0};
+    char *line;
+    
+}
+
+int main(int argc, char *argv[]) {
     
     return 0;
 }
