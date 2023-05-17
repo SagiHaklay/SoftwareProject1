@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 
 typedef struct PointType {
@@ -29,6 +28,7 @@ int updateCentroid(Cluster*);
 void printPoint(Point);
 Cluster matchCluster(Point point, Cluster clusters[], int k);
 PointList readInput(void);
+void handleError(void);
 
 double distance(Point p1, Point p2) {
     double sum = 0.0;
@@ -45,7 +45,9 @@ void addPointToList(PointList *list, Point point) {
     } else {
         list->pointsArr = (Point *)realloc(list->pointsArr, (list->length + 1)*sizeof(Point));
     }
-    assert(list->pointsArr != NULL);
+    if (list->pointsArr == NULL) {
+        handleError();
+    }
     list->pointsArr[list->length] = point;
     list->length++;
 }
@@ -58,6 +60,10 @@ void printPointList(PointList list) {
 }
 
 void clearPointList(PointList* list) {
+    int i;
+    for (i = 0; i < list->length; i++) {
+        free(list->pointsArr[i].data);
+    }
     free(list->pointsArr);
     list->pointsArr = NULL;
     list->length = 0;
@@ -67,7 +73,9 @@ int updateCentroid(Cluster* cluster){
     Point newCentroid = {NULL, 0};
     int converged, i, j;
     double *mean = calloc(cluster->centroid.length, sizeof(double));
-    assert(mean != NULL);
+    if (mean == NULL) {
+        handleError();
+    }
     for (i = 0; i < cluster->centroid.length; i++) {
         for (j = 0; j < cluster->points.length; j++) {
             mean[i] += cluster->points.pointsArr[j].data[i];
@@ -122,7 +130,9 @@ PointList readInput(void) {
             } else {
                 data = (double*)realloc(data, (dLength + 1)*sizeof(double));
             }
-            assert(data != NULL);
+            if (data == NULL) {
+                handleError();
+            }
             data[dLength] = atof(currNum);
             dLength++;
             if (ptr[currLen] == ','){
@@ -139,8 +149,57 @@ PointList readInput(void) {
     return list;
 }
 
-int main(void) {
-    PointList points = readInput();
-    printPointList(points);
+void handleError(void) {
+    printf("An Error Has Occurred\n");
+    exit(1);
+}
+
+int main(int argc, char *argv[]) {
+    PointList points = readInput(), lst = {NULL, 0};
+    Cluster *clusters;
+    int k = atoi(argv[1]);
+    int iter = 200, i, j, converged = 1;
+    if (argc >=3) {
+        iter = atoi(argv[2]);
+    }
+    if (k <= 1 || k >= points.length) {
+        printf("Invalid number of clusters!\n");
+        clearPointList(&points);
+        return 1;
+    }
+    if (iter <= 1 || iter >= 1000) {
+        printf("Invalid maximum iteration!\n");
+        clearPointList(&points);
+        return 1;
+    }
+    clusters = (Cluster *)calloc(k, sizeof(Cluster));
+    if (clusters == NULL) {
+        handleError();
+    }
+    for (i = 0; i < k; i++) {
+        clusters[i].centroid = points.pointsArr[i];
+        clusters[i].points = lst;
+    }
+    for (i = 0; i < iter; i++) {
+        for (j = 0; j < points.length; i++) {
+            Cluster nearestCluster = matchCluster(points.pointsArr[j], clusters, k);
+            addPointToList(&nearestCluster.points, points.pointsArr[j]);
+        }
+        for (j = 0; j < k; j++) {
+            converged = converged && updateCentroid(&clusters[j]);
+            clearPointList(&clusters[j].points);
+        }
+        if (converged) {
+            break;
+        }
+    }
+    for (i = 0; i < k; i++) {
+        printPoint(clusters[i].centroid);
+    }
+    clearPointList(&points);
+    for (i = 0; i < k; i++) {
+        free(clusters[i].centroid.data);
+        clearPointList(&clusters[i].points);
+    }
     return 0;
 }
