@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
         clusters[i].points = lst;
     }
     for (i = 0; i < iter; i++) {
-        for (j = 0; j < points.length; i++) {
+        for (j = 0; j < points.length; j++) {
             Cluster nearestCluster = matchCluster(points.pointsArr[j], clusters, k);
             addPointToList(&nearestCluster.points, points.pointsArr[j]);
         }
@@ -196,10 +196,6 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < k; i++) {
         printPoint(clusters[i].centroid);
     }
-    clearPointList(&points);
-    for (i = 0; i < k; i++) {
-        free(clusters[i].centroid.data);
-        clearPointList(&clusters[i].points);
-    }
+    free(clusters);
     return 0;
 }
