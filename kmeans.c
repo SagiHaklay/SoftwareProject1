@@ -70,9 +70,13 @@ void clearPointList(PointList* list) {
 }
 
 int updateCentroid(Cluster* cluster){
+    double *mean = NULL;
     Point newCentroid = {NULL, 0};
     int converged, i, j;
-    double *mean = calloc(cluster->centroid.length, sizeof(double));
+    if (cluster->points.length == 0) {
+        return 1;
+    }
+    mean = calloc(cluster->centroid.length, sizeof(double));
     if (mean == NULL) {
         handleError();
     }
@@ -120,6 +124,8 @@ PointList readInput(void) {
     while (scanf("%s\n", line) > 0) {
         ptr = line;
         currLen = 0;
+        data = NULL;
+        dLength = 0;
         while (ptr[currLen] != '\0') {
             while (ptr[currLen] != ',' && ptr[currLen] != '\0') {
                 currLen++;
@@ -185,6 +191,7 @@ int main(int argc, char *argv[]) {
             Cluster nearestCluster = matchCluster(points.pointsArr[j], clusters, k);
             addPointToList(&nearestCluster.points, points.pointsArr[j]);
         }
+        converged = 1;
         for (j = 0; j < k; j++) {
             converged = converged && updateCentroid(&clusters[j]);
             clearPointList(&clusters[j].points);
