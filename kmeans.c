@@ -125,6 +125,7 @@ PointList readInput(void) {
                 currLen++;
             }
             strncpy(currNum, ptr, currLen);
+            currNum[currLen] = '\0';
             if (dLength == 0) {
                 data = (double*)malloc(sizeof(double));
             } else {
