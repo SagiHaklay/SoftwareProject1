@@ -26,7 +26,7 @@ void printPointList(PointList);
 void clearPointList(PointList*);
 int updateCentroid(Cluster*);
 void printPoint(Point);
-Cluster matchCluster(Point point, Cluster clusters[], int k);
+Cluster *matchCluster(Point point, Cluster clusters[], int k);
 PointList readInput(void);
 void handleError(void);
 
@@ -60,10 +60,6 @@ void printPointList(PointList list) {
 }
 
 void clearPointList(PointList* list) {
-    int i;
-    for (i = 0; i < list->length; i++) {
-        free(list->pointsArr[i].data);
-    }
     free(list->pointsArr);
     list->pointsArr = NULL;
     list->length = 0;
@@ -101,15 +97,15 @@ void printPoint(Point point) {
     printf("\n");
 }
 
-Cluster matchCluster(Point point, Cluster clusters[], int k) {
+Cluster *matchCluster(Point point, Cluster clusters[], int k) {
     int i;
     double minDistance = distance(point, clusters[0].centroid);
-    Cluster nearestCluster = clusters[0];
+    Cluster *nearestCluster = clusters;
     for (i = 1; i < k; i++) {
         double currDistance = distance(point, clusters[i].centroid);
         if (currDistance < minDistance){
             minDistance = currDistance;
-            nearestCluster = clusters[i];
+            nearestCluster = &clusters[i];
         }
     }
     return nearestCluster;
@@ -188,8 +184,8 @@ int main(int argc, char *argv[]) {
     }
     for (i = 0; i < iter; i++) {
         for (j = 0; j < points.length; j++) {
-            Cluster nearestCluster = matchCluster(points.pointsArr[j], clusters, k);
-            addPointToList(&nearestCluster.points, points.pointsArr[j]);
+            Cluster *nearestCluster = matchCluster(points.pointsArr[j], clusters, k);
+            addPointToList(&nearestCluster->points, points.pointsArr[j]);
         }
         converged = 1;
         for (j = 0; j < k; j++) {
@@ -204,5 +200,9 @@ int main(int argc, char *argv[]) {
         printPoint(clusters[i].centroid);
     }
     free(clusters);
+    for (i = 0; i < points.length; i++) {
+        free(points.pointsArr[i].data);
+    }
+    clearPointList(&points);
     return 0;
 }
