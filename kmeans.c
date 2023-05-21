@@ -69,9 +69,7 @@ int updateCentroid(Cluster* cluster){
     double *mean = NULL;
     Point newCentroid = {NULL, 0};
     int converged, i, j;
-    if (cluster->points.length == 0) {
-        return 1;
-    }
+    
     mean = calloc(cluster->centroid.length, sizeof(double));
     if (mean == NULL) {
         handleError();
@@ -91,10 +89,10 @@ int updateCentroid(Cluster* cluster){
 
 void printPoint(Point point) {
     int i;
-    for (i = 0; i < point.length; i++) {
-        printf("%.4f ", point.data[i]);
+    for (i = 0; i < point.length - 1; i++) {
+        printf("%.4f,", point.data[i]);
     }
-    printf("\n");
+    printf("%.4f\n", point.data[i]);
 }
 
 Cluster *matchCluster(Point point, Cluster clusters[], int k) {
@@ -157,7 +155,7 @@ void handleError(void) {
 }
 
 int main(int argc, char *argv[]) {
-    PointList points = readInput(), lst = {NULL, 0};
+    PointList points = readInput();
     Cluster *clusters;
     int k = atoi(argv[1]);
     int iter = 200, i, j, converged = 1;
@@ -180,7 +178,7 @@ int main(int argc, char *argv[]) {
     }
     for (i = 0; i < k; i++) {
         clusters[i].centroid = points.pointsArr[i];
-        clusters[i].points = lst;
+
     }
     for (i = 0; i < iter; i++) {
         for (j = 0; j < points.length; j++) {
