@@ -186,14 +186,13 @@ int main(int argc, char *argv[]) {
             Cluster *nearestCluster = matchCluster(points.pointsArr[j], clusters, k);
             addPointToList(&nearestCluster->points, points.pointsArr[j]);
         }
+        converged = 1;
         for (j = 0; j < k; j++) {
-            converged = updateCentroid(&clusters[j]) && converged;
+            converged = converged && updateCentroid(&clusters[j]);
             clearPointList(&clusters[j].points);
         }
         if (converged) {
             break;
-        } else {
-            converged = 1;
         }
     }
     for (i = 0; i < k; i++) {
